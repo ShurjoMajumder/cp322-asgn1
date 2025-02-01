@@ -6,6 +6,7 @@ Completed By: Shurjo Majumder
 
 The answers to Part 1 are located in this file:
 1. [knn notebook](notebooks/knn_notebook.ipynb)
+2. [Q1 report](Q1%20Report.pdf)
 
 ## Part 2
 
