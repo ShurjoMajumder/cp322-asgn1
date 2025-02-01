@@ -1,3 +1,5 @@
+# Author: Robin Chen
+
 import os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -7,31 +9,19 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
 
-
 def load_data(real_path, fake_path):
-
-    if not os.path.exists(real_path):
-        raise FileNotFoundError(f"File not found: {real_path}")
-    if not os.path.exists(fake_path):
-        raise FileNotFoundError(f"File not found: {fake_path}")
-
-  
     with open(real_path, "r", encoding="utf-8") as f:
         real_headlines = f.readlines()
     with open(fake_path, "r", encoding="utf-8") as f:
         fake_headlines = f.readlines()
 
-    
     headlines = real_headlines + fake_headlines
     labels = [1] * len(real_headlines) + [0] * len(fake_headlines)
 
-    
     headlines = [" ".join(line.split()) for line in headlines]
-
     
     vectorizer = CountVectorizer()
     features = vectorizer.fit_transform(headlines)
-
     
     X_train, X_temp, y_train, y_temp = train_test_split(features, labels, test_size=0.3, random_state=42)
     X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42)
@@ -50,7 +40,6 @@ def select_model(X_train, y_train, X_val, y_val):
         acc = accuracy_score(y_val, y_pred)
         val_accuracies.append(acc)
         print(f"max_depth={depth}, Validation Accuracy={acc:.4f}")
-
    
     plt.figure(figsize=(8, 5))
     plt.plot(max_depths, val_accuracies, marker='o', linestyle='-', color='b', label="Validation Accuracy")
@@ -81,45 +70,38 @@ def visualize_tree(model, vectorizer):
     plt.show()
 
 
-if __name__ == "__main__":
-    real_path = "/workspaces/cp322/Decision Tree-Dataset/real.txt"
-    fake_path = "/workspaces/cp322/Decision Tree-Dataset/fake.txt"
-
-
-   
-    X_train, X_val, X_test, y_train, y_val, y_test, vectorizer = load_data(real_path, fake_path)
-
-    
-    best_depth = select_model(X_train, y_train, X_val, y_val)
-
-   
-    model = train_and_test(X_train, y_train, X_test, y_test, best_depth)
-
-    
-    visualize_tree(model, vectorizer)
-
 def print_tree_rules(model, vectorizer):
     """
     Prints the first two layers of the decision tree in text format.
     """
     feature_names = vectorizer.get_feature_names_out()
     tree = model.tree_
-    
-    
+
     root_feature = feature_names[tree.feature[0]]
     print(f"Root Node: '{root_feature}' (Threshold: {tree.threshold[0]:.2f})")
-    
+
     left_child = tree.children_left[0]
     right_child = tree.children_right[0]
-    
+
     if left_child != -1:
         left_feature = feature_names[tree.feature[left_child]]
         print(f"Left Child: '{left_feature}' (Threshold: {tree.threshold[left_child]:.2f})")
-    
+
     if right_child != -1:
         right_feature = feature_names[tree.feature[right_child]]
         print(f"Right Child: '{right_feature}' (Threshold: {tree.threshold[right_child]:.2f})")
 
-print_tree_rules(model, vectorizer)
 
+if __name__ == "__main__":
+    real_path = "datasets/real.txt"
+    fake_path = "datasets/fake.txt"
 
+    X_train, X_val, X_test, y_train, y_val, y_test, vectorizer = load_data(real_path, fake_path)
+
+    best_depth = select_model(X_train, y_train, X_val, y_val)
+
+    model = train_and_test(X_train, y_train, X_test, y_test, best_depth)
+
+    print_tree_rules(model, vectorizer)
+    
+    visualize_tree(model, vectorizer)
